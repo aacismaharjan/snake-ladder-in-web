@@ -1,112 +1,295 @@
 
-function initializeGame() {
-    const gameBoard = document.getElementById("gameBoard");
+class Board {
+    constructor(board, backgroundImage, SNAKES_AND_LADDERS) {
+        this.board = board;
+        this.backgroundImage = backgroundImage;
+        this.SNAKES_AND_LADDERS = SNAKES_AND_LADDERS;
+        this.board.style.backgroundImage = `url("${backgroundImage}")`;
+        this.playButton;
 
-    const redPlayerPiece = document.getElementById("redPlayerPiece"); /* Red Piece */
-    const greenPlayerPiece = document.getElementById("greenPlayerPiece"); /* Green Piece */
-    const bluePlayerPiece = document.getElementById("bluePlayerPiece"); /* Blue Piece */
-    const yellowPlayerPiece = document.getElementById("yellowPlayerPiece"); /* Yellow Piece */
-    const computerPlayerPiece = document.getElementById("computerPlayerPiece"); /* Computer Piece */
-
-    const redPlayerBtn = document.getElementById("red"); /* Red Play Button */
-    const greenPlayerBtn = document.getElementById("green"); /* Green Play Button */
-    const playerBlueBtn = document.getElementById("blue"); /* Blue Play Button */
-    const playerYellowBtn = document.getElementById("yellow"); /* Yellow Play Button */
-    const computerPlayerBtn = document.getElementById("computer"); /* Computer Play Button */
-
-    const redPlayer = new Player(0, "red", redPlayerPiece, redPlayerBtn, 0);
-    const greenPlayer = new Player(1, "green", greenPlayerPiece, greenPlayerBtn, 0);
-    const bluePlayer = new Player(2, "blue", bluePlayerPiece, playerBlueBtn, 0);
-    const yellowPlayer = new Player(3, "yellow", yellowPlayerPiece, playerYellowBtn, 0);
-    const computerPlayer = new Player(4, "computer", computerPlayerPiece, computerPlayerBtn, 0);
-
-    const superPlayButton = document.getElementById("superplay");
-
-
-    let currentPlayerTurn = 0; /* Red: 0, Green: 1, Blue: 2, Yellow: 3 */
-    let numberOfPlayers = 0;  /* No. of players between 1 and 4 */
-    let playerNames = ["red", "green", "blue", "yellow", "computer"];
-
-    let players = {
-        red: redPlayer,
-        green: greenPlayer,
-        blue: bluePlayer,
-        yellow: yellowPlayer,
-        computer: computerPlayer
     }
 
-    /* Current position of player piece in the board, 1-100 */
-    let playerPositions = {
-        red: 0,
-        green: 0,
-        blue: 0,
-        yellow: 0,
-        computer: 0,
-    };
+    getBoard() {
+        return this.board;
+    }
 
-    let isPlaying = false;
+    setBoard(board) {
+        this.board = board;
+    }
 
+    getbackgroundImage() {
+        return this.backgroundImage;
+    }
 
-    const diceImagePositions = [380, 318, 256, 195, 133, 71]; /* For dice number crop */
+    setbackgroundImage(backgroundImage) {
+        this.backgroundImage = backgroundImage;
+        this.board.style.backgroundImage = `url("${backgroundImage}")`;
+    }
 
-    /* Logic for snakes or ladders based on player position */
-    // gameBoard.style.backgroundImage = "url(/img/bg.jpg)";
-    // const SNAKES_AND_LADDERS = {
-    //     1: 38,
-    //     4: 14,
-    //     8: 30,
-    //     21: 42,
-    //     28: 76,
-    //     32: 10,
-    //     36: 6,
-    //     48: 26,
-    //     50: 67,
-    //     62: 18,
-    //     71: 92,
-    //     80: 99,
-    //     88: 24,
-    //     95: 56,
-    //     97: 78
-    // };
+    getSnakeAndLadders() {
+        return this.SNAKES_AND_LADDERS;
+    }
+
+    setSnakeAndLadders(SNAKES_AND_LADDERS) {
+        this.SNAKES_AND_LADDERS = SNAKES_AND_LADDERS;
+    }
+}
 
 
-    gameBoard.style.backgroundImage = "url(/img/bg2.jpg)";
-    const SNAKES_AND_LADDERS = {
-        5: 58,
-        14: 49,
-        38: 20,
-        51: 10,
-        53: 72,
-        64: 83,
-        76: 54,
-        91: 73,
-        97: 61
-    };
+class GameBoard {
+    constructor() {
+        this.diceImagePositions = [380, 318, 256, 195, 133, 71];
+        this.players = {};
+        this.playerPositions = {};
+        this.currentPlayerTurn = 0;
+        this.numberOfPlayers = 4;
+        this.isPlaying = false;
+        this.playerNames = ["red", "green", "blue", "yellow", "computer"];
+    }
+
+    getBoard = () => {
+        return this.board;
+    }
+
+    setBoard = (board) => {
+        this.board = board;
+    }
+
+    getPlayers = () => {
+        return this.players;
+    }
+
+    setPlayers = (players) => {
+        this.players = players;
+    }
+
+    getCurrentPlayerTurn = () => {
+        return this.currentPlayerTurn;
+    }
+
+    setCurrentPlayerTurn = (currentPlayerTurn) => {
+        this.currentPlayerTurn = currentPlayerTurn;
+    }
+
+    getNumberOfPlayers = () => {
+        return this.numberOfPlayers;
+    }
+
+    setNumberOfPlayers = (numberOfPlayers) => {
+        this.numberOfPlayers = numberOfPlayers;
+    }
+
+    getIsPlaying = () => {
+        return this.isPlaying;
+    }
+
+    setIsPlaying = (isPlaying) => {
+        this.isPlaying = isPlaying;
+    }
+
+    getDiceImagePositions = () => {
+        return this.diceImagePositions;
+    }
+
+    rollDice = () => {
+        let val = Math.floor(Math.random() * 6) + 1;
+        return val;
+    }
 
 
-    function storeGameSnapshot(position, turn, players) {
-        let gameState = { position, turn, players };
+    storeGameSnapshot = () => {
+        let gameState = {
+            position: this.playerPositions,
+            turn: this.currentPlayerTurn,
+            players: this.numberOfPlayers
+        };
         localStorage.setItem("gameState", JSON.stringify(gameState));
     }
 
-    /* Reset to default state */
-    function resetGame() {
-        playerPositions = { red: 0, green: 0, blue: 0, yellow: 0, computer: 0 };
-        localStorage.removeItem("gameState");
 
-        for (const playerName in players) {
-            let player = players[playerName];
-            player.setPosition(0);
-            player.updatePosition();
+    updatePlayers = () => {
+        const playersPlayButton = document.getElementsByClassName("play");
+
+        let i = 0;
+        // Display only selected player play button
+        Array.from(playersPlayButton).forEach((playerPlayButton, index) => {
+            if (index + 1 > this.numberOfPlayers) {
+                playerPlayButton.style.display = "none";
+            } else {
+                playerPlayButton.style.display = "block";
+            }
+
+            if (this.numberOfPlayers === 1) {
+                document.querySelector("#computer").style.display = "block";
+            } else {
+                document.querySelector("#computer").style.display = "none";
+            }
+        });
+
+        // Display only selected player piece
+        for (let playerName in this.players) {
+            let player = this.players[playerName];
+            if (i + 1 > this.numberOfPlayers) {
+                player.getPiece().style.display = "none";
+            } else {
+                player.getPiece().style.display = "block";
+            }
+            if (this.numberOfPlayers === 1) {
+                this.players["computer"].getPiece().style.display = "block";
+            } else {
+                this.players["computer"].getPiece().style.display = "none";
+            }
+            i++;
+        }
+    }
+
+    updateTurn = () => {
+        for (let playerName in this.players) {
+            let player = this.players[playerName];
+            player.getButton().disabled = true;
         }
 
-        currentPlayerTurn = 0;
-        updateTurn();
-        showMenu();
+        for (let playerName in this.players) {
+            let player = this.players[playerName];
+            player.getPiece().classList.remove("active");
+        }
+
+        if (this.numberOfPlayers === 1 && this.currentPlayerTurn === 1) {
+            this.players["computer"].getButton().disabled = false;
+            this.players["computer"].getPiece().classList.add("active");
+            playGame(this.players["computer"]);
+        } else {
+            this.players[this.playerNames[this.currentPlayerTurn]].getButton().disabled = false;
+            this.players[this.playerNames[this.currentPlayerTurn]].getPiece().classList.add("active");
+        }
     }
 
 
-    function playAudio(src) {
+
+
+
+
+    playGame = async (player) => {
+        player.getButton().disabled = true;
+        this.superPlayButton.disabled = true;
+        let logPara = document.getElementById("log");
+        let isCaptured = false;
+
+        // Roll the dice
+        this.playAudio("/audio/roll.mp3");
+        let diceRoll = this.rollDice();
+        document.getElementById("dice").style.backgroundPositionX = `${this.diceImagePositions[diceRoll - 1]}px`;
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+        let finalPosition = this.playerPositions[player.getName()] + diceRoll;
+
+        if (diceRoll === 6) {
+            this.playAudio("/audio/bonus.mp3");
+            await new Promise(resolve => setTimeout(resolve, 150));
+        }
+
+        if (finalPosition <= 100) {
+            for (let i = this.playerPositions[player.getName()]; i <= finalPosition; i++) {
+                this.playerPositions[player.getName()] = i;
+                player.setPosition(this.playerPositions[player.getName()]);
+                player.updatePosition();
+                this.playAudio("/audio/move.mp3");
+                await new Promise(resolve => setTimeout(resolve, 150));
+            }
+        }
+
+
+        await new Promise(resolve => setTimeout(resolve, 250));
+
+        if (this.playerPositions[player.getName()] < 100) {
+            let initialPos = this.playerPositions[player.getName()];
+            if (this.playerPositions[player.getName()] in this.board.getSnakeAndLadders()) {
+                this.playerPositions[player.getName()] = this.board.getSnakeAndLadders()[this.playerPositions[player.getName()]];
+                player.setPosition(this.playerPositions[player.getName()]);
+                player.updatePosition();
+
+                if (initialPos > this.playerPositions[player.getName()]) {
+                    this.playAudio("/audio/fall.mp3");
+                } else {
+                    this.playAudio("/audio/rise.mp3");
+                }
+
+            }
+
+            let msg = `[${new Date().toLocaleTimeString()}] Player rolled a ${diceRoll}. Current Position: ${this.playerPositions[player.getName()]} <br/>`;
+            logPara.innerHTML += msg;
+        } else {
+            let msg = `[${new Date().toLocaleTimeString()}] Player reached the final square. Game over!`;
+            logPara.innerHTML += msg;
+            player.setPosition(100);
+            player.updatePosition();
+            alert(`You won!, ${player.getName()}`);
+            this.resetGame();
+        }
+
+        // CHECK IF current player has attacked others in same position and make them restart again!
+        for (let playerName in this.playerPositions) {
+
+            if (playerName !== player.getName()) {
+                if (this.playerPositions[player.getName()] === this.playerPositions[playerName]) {
+                    this.playerPositions[playerName] = 0;
+                    isCaptured = true;
+                    this.playAudio("/audio/fall.mp3");
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    this.players[playerName].setPosition(0);
+                    this.players[playerName].updatePosition();
+                }
+            }
+        }
+
+        if (diceRoll !== 6 && !isCaptured) {
+            if (this.numberOfPlayers === 1) {
+                if (this.currentPlayerTurn < this.numberOfPlayers) {
+                    this.currentPlayerTurn++;
+                } else {
+                    this.currentPlayerTurn = 0;
+                }
+            } else {
+                if (this.currentPlayerTurn < (this.numberOfPlayers - 1)) {
+                    this.currentPlayerTurn++;
+                } else {
+                    this.currentPlayerTurn = 0;
+                }
+            }
+        }
+
+        if (this.playerPositions[player.getName()] == 0) {
+            player.getPiece().style.bottom = "-70px";
+        }
+
+        player.getButton().disabled = false;
+        this.superPlayButton.disabled = false;
+
+        this.storeGameSnapshot(this.playerPositions, this.currentPlayerTurn, this.numberOfPlayers);
+        player.setPosition(this.playerPositions[player.getName()]);
+        player.updatePosition();
+        this.updateTurn();
+    }
+
+
+    showMenu = () => {
+        document.querySelector("#menu").style.display = "block";
+        document.querySelector("#playground").style.display = "none";
+        document.querySelector("#superplay").disabled = true;
+    }
+
+    playGround = () => {
+        document.querySelector("#menu").style.display = "none";
+        document.querySelector("#playground").style.display = "block";
+        document.querySelector("#superplay").disabled = false;
+
+        this.storeGameSnapshot();
+
+        this.updatePlayers();
+        this.updateTurn();
+    }
+
+    playAudio = (src) => {
         var audio = new Audio(src);
 
         if (src == "/audio/bg.mp3") {
@@ -117,52 +300,7 @@ function initializeGame() {
         audio.play();
     }
 
-
-
-    /* Menu Buttons */
-    const playComputerBtn = document.querySelector("#playComputerBtn");
-    const playTwoPlayersBtn = document.querySelector("#playTwoPlayersBtn");
-    const playThreePlayersBtn = document.querySelector("#playThreePlayersBtn");
-    const playFourPlayersBtn = document.querySelector("#playFourPlayersBtn");
-    const resetBtn = document.querySelector("#resetBtn");
-
-    function updatePlayers() {
-        const playersPlayButton = document.getElementsByClassName("play");
-
-        let i = 0;
-        // Display only selected player play button
-        Array.from(playersPlayButton).forEach((playerPlayButton, index) => {
-            if (index + 1 > numberOfPlayers) {
-                playerPlayButton.style.display = "none";
-            } else {
-                playerPlayButton.style.display = "block";
-            }
-
-            if (numberOfPlayers === 1) {
-                document.querySelector("#computer").style.display = "block";
-            } else {
-                document.querySelector("#computer").style.display = "none";
-            }
-        });
-
-        // Display only selected player piece
-        for (let playerName in players) {
-            let player = players[playerName];
-            if (i + 1 > numberOfPlayers) {
-                player.getPiece().style.display = "none";
-            } else {
-                player.getPiece().style.display = "block";
-            }
-            if (numberOfPlayers === 1) {
-                computerPlayer.getPiece().style.display = "block";
-            } else {
-                computerPlayer.getPiece().style.display = "none";
-            }
-            i++;
-        }
-    }
-
-    function fetchGameState() {
+    fetchGameState = () => {
         /* Get current state of game from local storage */
         let localGameState = localStorage.getItem("gameState");
 
@@ -170,223 +308,146 @@ function initializeGame() {
         if (localGameState) {
             localGameState = JSON.parse(localGameState);
 
-            playerPositions = localGameState.position;
-            currentPlayerTurn = localGameState.turn;
-            numberOfPlayers = localGameState.players;
+            this.playerPositions = localGameState.position;
+            this.currentPlayerTurn = localGameState.turn;
+            this.numberOfPlayers = localGameState.players;
 
 
-            redPlayer.setPosition(playerPositions["red"]);
-            greenPlayer.setPosition(playerPositions["green"]);
-            bluePlayer.setPosition(playerPositions["blue"]);
-            yellowPlayer.setPosition(playerPositions["yellow"]);
-            computerPlayer.setPosition(playerPositions["computer"]);
+            this.players["red"].setPosition(this.playerPositions["red"]);
+            this.players["green"].setPosition(this.playerPositions["green"]);
+            this.players["blue"].setPosition(this.playerPositions["blue"]);
+            this.players["yellow"].setPosition(this.playerPositions["yellow"]);
+            this.players["computer"].setPosition(this.playerPositions["computer"]);
 
-            redPlayer.updatePosition();
-            greenPlayer.updatePosition();
-            bluePlayer.updatePosition();
-            yellowPlayer.updatePosition();
-            computerPlayer.updatePosition();
-            playGround();
+            this.players["red"].updatePosition();
+            this.players["green"].updatePosition();
+            this.players["blue"].updatePosition();
+            this.players["yellow"].updatePosition();
+            this.players["computer"].updatePosition();
+            this.playGround();
         }
     }
 
-    function playGround() {
-        storeGameSnapshot(playerPositions, currentPlayerTurn, numberOfPlayers);
-        document.querySelector("#menu").style.display = "none";
-        document.querySelector("#playground").style.display = "block";
-        document.querySelector("#superplay").disabled = false;
 
-        updatePlayers();
-        updateTurn();
-    }
+    resetGame = () => {
+        this.playerPositions = { red: 0, green: 0, blue: 0, yellow: 0, computer: 0 };
+        localStorage.removeItem("gameState");
 
-
-    function showMenu() {
-        document.querySelector("#menu").style.display = "block";
-        document.querySelector("#playground").style.display = "none";
-        document.querySelector("#superplay").disabled = true;
-    }
-
-    resetBtn.addEventListener("click", resetGame);
-
-    playComputerBtn.addEventListener("click", (event) => {
-        numberOfPlayers = 1;
-        playGround();
-
-    });
-
-    playTwoPlayersBtn.addEventListener("click", (event) => {
-        numberOfPlayers = 2;
-        playGround();
-    });
-
-    playThreePlayersBtn.addEventListener("click", (event) => {
-        numberOfPlayers = 3;
-        playGround();
-    });
-
-    playFourPlayersBtn.addEventListener("click", (event) => {
-        numberOfPlayers = 4;
-        playGround();
-    });
-
-    async function playGame(player) {
-        console.log(player);
-        player.getButton().disabled = true;
-        superPlayButton.disabled = true;
-        let logPara = document.getElementById("log");
-        let isCaptured = false;
-
-        // Roll the dice
-        playAudio("/audio/roll.mp3");
-        let diceRoll = rollDice();
-        document.getElementById("dice").style.backgroundPositionX = `${diceImagePositions[diceRoll - 1]}px`;
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-        let finalPosition = playerPositions[player.getName()] + diceRoll;
-
-        if (diceRoll === 6) {
-            playAudio("/audio/bonus.mp3");
-            await new Promise(resolve => setTimeout(resolve, 150));
-        }
-
-        if(finalPosition <= 100) {
-            for (let i = playerPositions[player.getName()]; i <= finalPosition; i++) {
-                playerPositions[player.getName()] = i;
-                player.setPosition(playerPositions[player.getName()]);
-                player.updatePosition();
-                playAudio("/audio/move.mp3");
-                await new Promise(resolve => setTimeout(resolve, 150));
-            }
-        }
-        
-
-        await new Promise(resolve => setTimeout(resolve, 250));
-
-        if (playerPositions[player.getName()] < 100) {
-            let initialPos = playerPositions[player.getName()];
-            if (playerPositions[player.getName()] in SNAKES_AND_LADDERS) {
-                playerPositions[player.getName()] = SNAKES_AND_LADDERS[playerPositions[player.getName()]];
-                player.setPosition(playerPositions[player.getName()]);
-                player.updatePosition();
-
-                if (initialPos > playerPositions[player.getName()]) {
-                    playAudio("/audio/fall.mp3");
-                } else {
-                    playAudio("/audio/rise.mp3");
-                }
-
-            }
-
-            let msg = `[${new Date().toLocaleTimeString()}] Player rolled a ${diceRoll}. Current Position: ${playerPositions[player.getName()]} <br/>`;
-            logPara.innerHTML += msg;
-        } else {
-            let msg = `[${new Date().toLocaleTimeString()}] Player reached the final square. Game over!`;
-            logPara.innerHTML += msg;
-            player.setPosition(100);
+        for (const playerName in this.players) {
+            let player = this.players[playerName];
+            player.setPosition(0);
             player.updatePosition();
-            alert(`You won!, ${player.getName()}`);
-            resetGame();
         }
 
-        // CHECK IF current player has attacked others in same position and make them restart again!
-        for (let playerName in playerPositions) {
+        this.currentPlayerTurn = 0;
+        this.updateTurn();
+        this.showMenu();
+    }
 
-            if (playerName !== player.getName()) {
-                if (playerPositions[player.getName()] === playerPositions[playerName]) {
-                    playerPositions[playerName] = 0;
-                    isCaptured = true;
-                    await new Promise(resolve => setTimeout(resolve, 150));
-                    players[playerName].setPosition(0);
-                    players[playerName].updatePosition();
-                }
+    playerRoll = () => {
+        if (this.isPlaying === false) {
+            this.playAudio("/audio/bg.mp3");
+            this.isPlaying = true;
+        }
+        if (this.currentPlayerTurn === 0) this.playGame(this.players["red"]);
+        if (this.numberOfPlayers !== 1 && this.currentPlayerTurn === 1) this.playGame(this.players["green"]);
+        if (this.currentPlayerTurn === 2) this.playGame(this.players["blue"]);
+        if (this.currentPlayerTurn === 3) this.playGame(this.players["yellow"]);
+        if (this.numberOfPlayers === 1 && this.currentPlayerTurn === 1) this.playGame(this.players["computer"]);
+    }
+
+    initializeGame = () => {
+        const boardElement = document.getElementById("gameBoard");
+
+        const redPlayerPiece = document.getElementById("redPlayerPiece"); /* Red Piece */
+        const greenPlayerPiece = document.getElementById("greenPlayerPiece"); /* Green Piece */
+        const bluePlayerPiece = document.getElementById("bluePlayerPiece"); /* Blue Piece */
+        const yellowPlayerPiece = document.getElementById("yellowPlayerPiece"); /* Yellow Piece */
+        const computerPlayerPiece = document.getElementById("computerPlayerPiece"); /* Computer Piece */
+
+        const redPlayerBtn = document.getElementById("red"); /* Red Play Button */
+        const greenPlayerBtn = document.getElementById("green"); /* Green Play Button */
+        const playerBlueBtn = document.getElementById("blue"); /* Blue Play Button */
+        const playerYellowBtn = document.getElementById("yellow"); /* Yellow Play Button */
+        const computerPlayerBtn = document.getElementById("computer"); /* Computer Play Button */
+
+        const redPlayer = new Player(0, "red", redPlayerPiece, redPlayerBtn, 0);
+        const greenPlayer = new Player(1, "green", greenPlayerPiece, greenPlayerBtn, 0);
+        const bluePlayer = new Player(2, "blue", bluePlayerPiece, playerBlueBtn, 0);
+        const yellowPlayer = new Player(3, "yellow", yellowPlayerPiece, playerYellowBtn, 0);
+        const computerPlayer = new Player(1, "computer", computerPlayerPiece, computerPlayerBtn, 0);
+
+        /* Menu Buttons */
+        const playComputerBtn = document.querySelector("#playComputerBtn");
+        const playTwoPlayersBtn = document.querySelector("#playTwoPlayersBtn");
+        const playThreePlayersBtn = document.querySelector("#playThreePlayersBtn");
+        const playFourPlayersBtn = document.querySelector("#playFourPlayersBtn");
+        const superPlayButton = document.getElementById("superplay");
+        const resetBtn = document.querySelector("#resetBtn");
+
+        let players = {
+            red: redPlayer,
+            green: greenPlayer,
+            blue: bluePlayer,
+            yellow: yellowPlayer,
+            computer: computerPlayer
+        };
+
+        let playerPositions = {
+            red: 0,
+            green: 0,
+            blue: 0,
+            yellow: 0,
+            computer: 0,
+        };
+
+
+        const board = new Board(boardElement, GAME_BOARD_BG_01, SNAKES_AND_LADDERS_01);
+
+        this.board = board;
+        this.players = players;
+        this.playerPositions = playerPositions;
+        this.currentPlayerTurn = 0;
+        this.numberOfPlayers = 0;
+        this.superPlayButton = superPlayButton;
+
+        superPlayButton.addEventListener("click", this.playerRoll);
+
+        resetBtn.addEventListener("click", this.resetGame);
+
+        playComputerBtn.addEventListener("click", (event) => {
+            this.numberOfPlayers = 1;
+            this.playGround();
+
+        });
+
+        playTwoPlayersBtn.addEventListener("click", (event) => {
+            this.numberOfPlayers = 2;
+            this.playGround();
+        });
+
+        playThreePlayersBtn.addEventListener("click", (event) => {
+            this.numberOfPlayers = 3;
+            this.playGround();
+        });
+
+        playFourPlayersBtn.addEventListener("click", (event) => {
+            this.numberOfPlayers = 4;
+            this.playGround();
+        });
+
+        this.fetchGameState();
+
+        /* Start game on enter key press */
+        window.addEventListener("keypress", (e) => {
+            if (e.code === "Enter" && superPlayButton.disabled === false) {
+                this.playerRoll();
             }
-        }
+        });
 
-        if (diceRoll !== 6 && !isCaptured) {
-            if (numberOfPlayers === 1) {
-                if (currentPlayerTurn < numberOfPlayers) {
-                    currentPlayerTurn++;
-                } else {
-                    currentPlayerTurn = 0;
-                }
-            } else {
-                if (currentPlayerTurn < (numberOfPlayers - 1)) {
-                    currentPlayerTurn++;
-                } else {
-                    currentPlayerTurn = 0;
-                }
-            }
-        }
-
-        if (playerPositions[player.getName()] == 0) {
-            player.getPiece().style.bottom = "-70px";
-        }
-
-        player.getButton().disabled = false;
-        superPlayButton.disabled = false;
-
-        storeGameSnapshot(playerPositions, currentPlayerTurn, numberOfPlayers);
-        player.setPosition(playerPositions[player.getName()]);
-        player.updatePosition();
-        updateTurn();
+        this.updateTurn();
     }
-
-    function playerRoll() {
-        if (isPlaying === false) {
-            playAudio("/audio/bg.mp3");
-            isPlaying = true;
-        }
-        if (currentPlayerTurn === 0) playGame(redPlayer);
-        if (numberOfPlayers !== 1 && currentPlayerTurn === 1) playGame(greenPlayer);
-        if (currentPlayerTurn === 2) playGame(bluePlayer);
-        if (currentPlayerTurn === 3) playGame(yellowPlayer);
-        if (numberOfPlayers === 1 && currentPlayerTurn === 1) playGame(computerPlayer);
-    }
-
-    superPlayButton.addEventListener("click", playerRoll);
-
-    function updateTurn() {
-        for (let playerName in players) {
-            let player = players[playerName];
-            player.getButton().disabled = true;
-        }
-
-        for (let playerName in players) {
-            let player = players[playerName];
-            player.getPiece().classList.remove("active");
-        }
-
-        if (numberOfPlayers === 1 && currentPlayerTurn === 1) {
-            computerPlayer.getButton().disabled = false;
-            computerPlayer.getPiece().classList.add("active");
-            playGame(computerPlayer);
-        } else {
-            players[playerNames[currentPlayerTurn]].getButton().disabled = false;
-            players[playerNames[currentPlayerTurn]].getPiece().classList.add("active");
-        }
-    }
-
-
-    function rollDice() {
-        let val = Math.floor(Math.random() * 6) + 1;
-        return val;
-    }
-
-    
-
-    fetchGameState();
-
-    /* Start game on enter key press */
-    window.addEventListener("keypress", function PlayOnEnter(e) {
-        if (e.code === "Enter" && superPlayButton.disabled === false) {
-            playerRoll();
-        }
-    });
-
-
-    updateTurn();
-
 }
 
-initializeGame();
+const gameBoard = new GameBoard();
+gameBoard.initializeGame();
