@@ -10,10 +10,9 @@ body {
     justify-content: space-around;
     align-items: center;
     flex-direction: column;
-    background-image: url("/img/garden.jpg");
+    background-image: url("/img/garden2.jpg");
     background-size: cover;
     background-repeat: repeat;
-    padding: 2.5rem;
     min-height: 100vh;
 
 }
@@ -32,13 +31,51 @@ button {
 
 /* --- GLOBAL STYLES END --- */
 
-#gameBoard {
+
+.menu__container {
     position: relative;
+    padding: 20px;
+    width: 360px;
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+    z-index: 99;
+}
+
+.menu__container button {
+    padding: 16px;
+    background: saddlebrown;
+    color: white;
+    text-transform: uppercase;
+    box-shadow: none;
+    transform: skew(0deg, -2deg);
+}
+
+
+#playground {
+    position: relative;
+    display: none;
+    width: 100%;
+    z-index: 99;
+}
+
+
+#boardWrapper {
+    position: relative;
+    height: 0px;
+    padding-top: 100%;
+    background-color: blue;
+}
+
+#gameBoard {
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
     background-image: url("/img/bg.jpg");
     background-repeat: no-repeat;
     background-size: cover;
-    width: 500px;
-    height: 500px;
 }
 
 #gameBoard::before {
@@ -46,7 +83,7 @@ button {
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: saddlebrown;
     z-index: -1;
     transform: scale(1.075);
     border-radius: 8px;
@@ -61,7 +98,7 @@ button {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background: white;
+    background: saddlebrown;
     padding: 10px;
     border-radius: 10px;
 }
@@ -80,17 +117,41 @@ button {
     position: absolute;
     bottom: 0px;
     right: -110px;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: saddlebrown;
     padding: 15px;
     border-radius: 10px;
 }
+
+#gamePodium {
+
+    display: none;
+    gap: 15px;
+    flex-direction: column;
+    position: absolute;
+    top: -10px;
+    left: -110px;
+    /* background-color: rgba(255, 255, 255, 0.85); */
+    background: linear-gradient(0deg, saddlebrown, saddlebrown);
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 5px;
+    border: 5px solid saddlebrown;
+}
+
+#gamePodium .podium {
+    position: static !important;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+
 
 #superplay {
     width: 50px;
     height: 50px;
     border: none;
     background-color: goldenrod;
-    margin-top: 10px;
     border: 1px solid black;
     border-radius: 5px;
 
@@ -106,6 +167,11 @@ button {
     height: 28px;
 }
 
+#startingLinePlayers {
+    position: absolute;
+    background-color: saddlebrown;
+}
+
 #dice {
     width: 50px;
     height: 50px;
@@ -119,12 +185,12 @@ button {
 
 .player {
     position: absolute;
-    bottom: -70px;
+    bottom: -95px;
     left: 0px;
     background-image: url("/img/pieces.jpg");
     background-repeat: no-repeat;
     background-size: 195px 120px;
-    background-position: 0px 0px;
+    background-position: 0px 0px; 
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -168,17 +234,20 @@ button {
     0% {
         /* transform: scale(0.7) rotate(0deg); */
         box-shadow: 0px 0px 0px 0px goldenrod;
+        transform: scale(0.7);
     }
 
 
     50% {
         box-shadow: 0px 0px 5px 6px goldenrod;
+        transform: scale(0.6);
 
     }
 
     100% {
         /* transform: scale(0.7) rotate(360deg); */
         box-shadow: 0px 0px 0px 0px goldenrod;
+        transform: scale(0.7);
     }
 }
 
@@ -195,28 +264,34 @@ button {
 
 #red {
     background: red;
+    border: 1px solid white;
 }
 
 #green {
     background: green;
+    border: 1px solid white;
 }
 
 #blue {
     background: blue;
+    border: 1px solid white;
 }
 
 #yellow {
     background: yellow;
+    border: 1px solid white;
 }
 
 #computer {
     background: black;
+    border: 1px solid white;
 }
 
 #resetBtn {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid white;
 }
 
 #redPlayerPiece {
@@ -246,19 +321,39 @@ button {
     display: none;
 }
 
-#playground {
-    position: relative;
-    display: none;
-    z-index: 99;
-}
 
-.menu__container {
-    position: relative;
-    padding: 20px;
-    width: 360px;
-    display: flex;
-    gap: 15px;
-    background: white;
-    flex-direction: column;
-    z-index: 99;
+@media screen and (min-width: 0px) {
+    #playground {
+        padding: 95px 20px;
+        max-width: 540px;
+        min-width: 375px;
+    }
+
+    .controller {
+        position: absolute;
+        flex-direction: row;
+        left: 50%;
+        top: unset;
+        bottom: -80px;
+        transform: translateX(-50%);
+        justify-content: center;
+        gap: 15px;
+    }
+
+    #gameController {
+        display: flex;
+        align-items: center;
+        right: -17px;
+        bottom: -110px;
+        gap: 10px;
+        flex-direction: row-reverse;
+        width: 107%;
+    }
+
+    #gamePodium {
+        flex-direction: row;
+        left: -20px;
+        top: -110px;
+    }
+
 }

@@ -10,6 +10,10 @@ class GameBoard {
         this.numberOfPlayers = 4;
         this.isPlaying = false;
         this.playerNames = ["red", "green", "blue", "yellow", "computer"];
+        this.isGameOver = true;
+        this.podium = [];
+        this.scale = 1;
+
     }
 
     getBoard = () => {
@@ -58,7 +62,49 @@ class GameBoard {
 
     rollDice = () => {
         let val = Math.floor(Math.random() * 6) + 1;
+        // let val = 1;
         return val;
+    }
+
+    setPodium = (newPlayer) => {
+        if (!this.podium.includes(newPlayer)) {
+            this.podium.push(newPlayer);
+            let currentFinisher = this.players[newPlayer];
+            currentFinisher.getPiece().classList.add("podium");
+            document.querySelector("#gamePodium").appendChild(currentFinisher.getPiece());
+        }
+
+        if (this.podium.length > 0) {
+            document.querySelector("#gamePodium").style.display = "flex";
+        } else {
+            document.querySelector("#gamePodium").style.display = "none";
+
+        }
+    }
+
+    updatePodium = () => {
+        for (let playerName in this.playerPositions) {
+            if (this.playerPositions[playerName] === 100) {
+                this.setPodium(playerName);
+            }
+        }
+    }
+
+    gameOver = async () => {
+        alert("Game is over!");
+        alert("Winner is " + this.podium[0]);
+        alert("PODIUM: " + this.podium);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        for (let playerName in this.playerPositions) {
+            if (this.playerPositions[playerName] === 100) {
+                let currentFinisher = this.players[playerName];
+                currentFinisher.getPiece().classList.remove("podium");
+                document.querySelector("#gamePodium").removeChild(currentFinisher.getPiece());
+                document.querySelector("#gameBoard").appendChild(currentFinisher.getPiece());
+            }
+        }
+        this.resetGame();
+        this.updatePodium();
     }
 
 
@@ -108,25 +154,30 @@ class GameBoard {
         }
     }
 
-    updateTurn = () => {
-        for (let playerName in this.players) {
-            let player = this.players[playerName];
-            player.getButton().disabled = true;
+    updateTurn = async () => {
+
+        if (this.podium.includes(this.playerNames[this.currentPlayerTurn]) === false) {
+            for (let playerName in this.players) {
+                let player = this.players[playerName];
+                player.getButton().disabled = true;
+            }
+
+            for (let playerName in this.players) {
+                let player = this.players[playerName];
+                player.getPiece().classList.remove("active");
+            }
+
+            if (this.numberOfPlayers === 1 && this.currentPlayerTurn === 1) {
+                this.players["computer"].getButton().disabled = false;
+                this.players["computer"].getPiece().classList.add("active");
+                this.playGame(this.players["computer"]);
+            } else {
+                this.players[this.playerNames[this.currentPlayerTurn]].getButton().disabled = false;
+                this.players[this.playerNames[this.currentPlayerTurn]].getPiece().classList.add("active");
+            }
         }
 
-        for (let playerName in this.players) {
-            let player = this.players[playerName];
-            player.getPiece().classList.remove("active");
-        }
 
-        if (this.numberOfPlayers === 1 && this.currentPlayerTurn === 1) {
-            this.players["computer"].getButton().disabled = false;
-            this.players["computer"].getPiece().classList.add("active");
-            playGame(this.players["computer"]);
-        } else {
-            this.players[this.playerNames[this.currentPlayerTurn]].getButton().disabled = false;
-            this.players[this.playerNames[this.currentPlayerTurn]].getPiece().classList.add("active");
-        }
     }
 
 
@@ -136,6 +187,7 @@ class GameBoard {
 
     playGame = async (player) => {
         player.getButton().disabled = true;
+        player.getPiece().style.zIndex = "99";
         this.superPlayButton.disabled = true;
         let logPara = document.getElementById("log");
         let isCaptured = false;
@@ -154,15 +206,25 @@ class GameBoard {
         }
 
         if (finalPosition <= 100) {
-            for (let i = this.playerPositions[player.getName()]; i <= finalPosition; i++) {
-                this.playerPositions[player.getName()] = i;
-                player.setPosition(this.playerPositions[player.getName()]);
-                player.updatePosition();
-                this.playAudio("/audio/move.mp3");
-                await new Promise(resolve => setTimeout(resolve, 150));
+            if (player.getPosition() === 0) {
+                if (diceRoll === 6) {
+                    this.playerPositions[player.getName()] = 1;
+                    player.setPosition(1);
+                    player.updatePosition();
+                    this.playAudio("/audio/move.mp3");
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+            } else {
+                for (let i = this.playerPositions[player.getName()]; i <= finalPosition; i++) {
+                    this.playerPositions[player.getName()] = i;
+                    player.setPosition(this.playerPositions[player.getName()]);
+                    player.updatePosition();
+                    this.playAudio("/audio/move.mp3");
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+
             }
         }
-
 
         await new Promise(resolve => setTimeout(resolve, 250));
 
@@ -183,57 +245,87 @@ class GameBoard {
 
             let msg = `[${new Date().toLocaleTimeString()}] Player rolled a ${diceRoll}. Current Position: ${this.playerPositions[player.getName()]} <br/>`;
             logPara.innerHTML += msg;
+
+            // CHECK IF current player has attacked others in same position and make them restart again!
+            for (let playerName in this.playerPositions) {
+
+                if (playerName !== player.getName() && player.getPosition() !== 0) {
+                    if (this.playerPositions[player.getName()] === this.playerPositions[playerName]) {
+                        this.playerPositions[playerName] = 0;
+                        isCaptured = true;
+                        this.playAudio("/audio/fall.mp3");
+                        await new Promise(resolve => setTimeout(resolve, 150));
+                        this.players[playerName].setPosition(0);
+                        this.players[playerName].updatePosition();
+                    }
+                }
+            }
+
+
+
         } else {
             let msg = `[${new Date().toLocaleTimeString()}] Player reached the final square. Game over!`;
             logPara.innerHTML += msg;
             player.setPosition(100);
             player.updatePosition();
-            alert(`You won!, ${player.getName()}`);
-            this.resetGame();
+
+            this.setPodium(player.getName());
+            console.log(this.podium);
+            // this.podium.push(player.getName());
+            // alert(`You won!, ${player.getName()}`);
+            // this.resetGame();
+            // this.isGameOver = true;
         }
 
-        // CHECK IF current player has attacked others in same position and make them restart again!
-        for (let playerName in this.playerPositions) {
 
-            if (playerName !== player.getName()) {
-                if (this.playerPositions[player.getName()] === this.playerPositions[playerName]) {
-                    this.playerPositions[playerName] = 0;
-                    isCaptured = true;
-                    this.playAudio("/audio/fall.mp3");
-                    await new Promise(resolve => setTimeout(resolve, 150));
-                    this.players[playerName].setPosition(0);
-                    this.players[playerName].updatePosition();
+        if ((diceRoll !== 6 && !isCaptured) || player.getPosition() >= 100) {
+            let playerName = player.getName();
+            do {
+                // Check if game is over
+                let calculatedPlayer = this.numberOfPlayers === 1 ? 2 : this.numberOfPlayers;
+                if ((this.podium.length === calculatedPlayer) || this.isGameOver === true) {
+                    this.gameOver();
+                    return;
                 }
-            }
-        }
 
-        if (diceRoll !== 6 && !isCaptured) {
-            if (this.numberOfPlayers === 1) {
-                if (this.currentPlayerTurn < this.numberOfPlayers) {
-                    this.currentPlayerTurn++;
+                // If already in podium
+                if (this.numberOfPlayers === 1) {
+                    if (this.currentPlayerTurn < this.numberOfPlayers) {
+                        this.currentPlayerTurn++;
+                    } else {
+                        this.currentPlayerTurn = 0;
+                    }
                 } else {
-                    this.currentPlayerTurn = 0;
+                    if (this.currentPlayerTurn < (this.numberOfPlayers - 1)) {
+                        this.currentPlayerTurn++;
+                    } else {
+                        this.currentPlayerTurn = 0;
+                    }
                 }
-            } else {
-                if (this.currentPlayerTurn < (this.numberOfPlayers - 1)) {
-                    this.currentPlayerTurn++;
-                } else {
-                    this.currentPlayerTurn = 0;
-                }
-            }
+
+                playerName = this.playerNames[this.numberOfPlayers === 1 && this.currentPlayerTurn === 1 ? 4 : this.currentPlayerTurn];
+            } while (this.podium.includes(playerName));
         }
+
 
         if (this.playerPositions[player.getName()] == 0) {
             player.getPiece().style.bottom = "-70px";
         }
 
+
+
+
         player.getButton().disabled = false;
+        player.getPiece().style.zIndex = "1";
         this.superPlayButton.disabled = false;
 
         this.storeGameSnapshot(this.playerPositions, this.currentPlayerTurn, this.numberOfPlayers);
         player.setPosition(this.playerPositions[player.getName()]);
         player.updatePosition();
         this.updateTurn();
+
+
+
     }
 
 
@@ -305,7 +397,10 @@ class GameBoard {
         }
 
         this.currentPlayerTurn = 0;
+        this.isGameOver = false;
+        this.podium = [];
         this.updateTurn();
+        this.updatePlayers();
         this.showMenu();
     }
 
@@ -367,7 +462,7 @@ class GameBoard {
         };
 
 
-        const board = new Board(boardElement, GAME_BOARD_BG_01, SNAKES_AND_LADDERS_01);
+        const board = new Board(boardElement, GAME_BOARD_BG_02, SNAKES_AND_LADDERS_02);
 
         this.board = board;
         this.players = players;
@@ -375,6 +470,7 @@ class GameBoard {
         this.currentPlayerTurn = 0;
         this.numberOfPlayers = 0;
         this.superPlayButton = superPlayButton;
+        this.isGameOver = false;
 
         superPlayButton.addEventListener("click", this.playerRoll);
 
@@ -402,13 +498,35 @@ class GameBoard {
         });
 
         this.fetchGameState();
+        this.updatePodium();
+        this.updateTurn();
 
         /* Start game on enter key press */
         window.addEventListener("keypress", (e) => {
-            if (e.code === "Enter" && superPlayButton.disabled === false) {
-                this.playerRoll();
-            }
+            // if (e.code === "Enter" && superPlayButton.disabled === false && this.isGameOver === false) {
+            //     this.playerRoll();
+
+            // }
+
+            this.playerRoll();
         });
+
+        const  windowResize = () => {
+            const boardWrapper = document.querySelector("#boardWrapper");
+            
+            if (boardWrapper) {
+                console.log(boardWrapper);
+                this.scale = boardWrapper.clientWidth / 500;
+                console.log(this.scale);
+                console.log(this.playerPositions);
+                for (let player in this.players) {
+                    this.players[player].setScale(this.scale);
+                }
+            }
+        }
+
+        window.addEventListener("resize",windowResize);
+        window.addEventListener("load", windowResize)
 
         this.updateTurn();
     }

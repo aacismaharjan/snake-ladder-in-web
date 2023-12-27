@@ -20,30 +20,37 @@
     </div>
 
     <div id="playground">
-        <div id="gameBoard">
-            <div class="player" id="redPlayerPiece">
-                <span class="player-name">Red</span>
-            </div>
-            <div class="player" id="greenPlayerPiece">
-                <span class="player-name">Green</span>
-            </div>
-            <div class="player" id="bluePlayerPiece">
-                <span class="player-name">Blue</span>
-            </div>
-            <div class="player" id="yellowPlayerPiece">
-                <span class="player-name">Yellow</span>
-            </div>
-
-            <div class="player" id="computerPlayerPiece">
-                <span class="player-name">Computer</span>
-            </div>
-            
+        <div id="boardWrapper">
+            <div id="gameBoard">
+                <div class="player" id="redPlayerPiece">
+                    <span class="player-name">Red</span>
+                </div>
+                <div class="player" id="greenPlayerPiece">
+                    <span class="player-name">Green</span>
+                </div>
+                <div class="player" id="bluePlayerPiece">
+                    <span class="player-name">Blue</span>
+                </div>
+                <div class="player" id="yellowPlayerPiece">
+                    <span class="player-name">Yellow</span>
+                </div>
     
-            <div id="gameController">
-                <div id="dice"></div>
-                <button id="superplay" disabled>
-                    <img src="/icons/play.svg" alt="Play button">
-                </button>
+                <div class="player" id="computerPlayerPiece">
+                    <span class="player-name">Computer</span>
+                </div>
+    
+                <div id="startingLinePlayers"></div>
+                
+        
+                <div id="gameController">
+                    <div id="dice"></div>
+                    <button id="superplay" disabled>
+                        <img src="/icons/play.svg" alt="Play button">
+                    </button>
+                </div>
+    
+                <div id="gamePodium">
+                </div>
             </div>
         </div>
     
