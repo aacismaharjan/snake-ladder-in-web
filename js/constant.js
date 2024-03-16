@@ -1,4 +1,4 @@
-const GAME_BOARD_BG_01 = "/img/bg.jpg";
+const GAME_BOARD_BG_01 = "./img/bg.jpg";
 const SNAKES_AND_LADDERS_01 = {
     1: 38,
     4: 14,
@@ -18,7 +18,7 @@ const SNAKES_AND_LADDERS_01 = {
 };
 
 
-const GAME_BOARD_BG_02 = "/img/bg2.jpg";
+const GAME_BOARD_BG_02 = "./img/bg2.jpg";
 const SNAKES_AND_LADDERS_02 = {
     5: 58,
     14: 49,

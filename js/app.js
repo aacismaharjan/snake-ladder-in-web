@@ -193,7 +193,7 @@ class GameBoard {
         let isCaptured = false;
 
         // Roll the dice
-        this.playAudio("/audio/roll.mp3");
+        this.playAudio("./audio/roll.mp3");
         let diceRoll = this.rollDice();
         document.getElementById("dice").style.backgroundPositionX = `${this.diceImagePositions[diceRoll - 1]}px`;
 
@@ -201,7 +201,7 @@ class GameBoard {
         let finalPosition = this.playerPositions[player.getName()] + diceRoll;
 
         if (diceRoll === 6) {
-            this.playAudio("/audio/bonus.mp3");
+            this.playAudio("./audio/bonus.mp3");
             await new Promise(resolve => setTimeout(resolve, 150));
         }
 
@@ -211,7 +211,7 @@ class GameBoard {
                     this.playerPositions[player.getName()] = 1;
                     player.setPosition(1);
                     player.updatePosition();
-                    this.playAudio("/audio/move.mp3");
+                    this.playAudio("./audio/move.mp3");
                     await new Promise(resolve => setTimeout(resolve, 150));
                 }
             } else {
@@ -219,7 +219,7 @@ class GameBoard {
                     this.playerPositions[player.getName()] = i;
                     player.setPosition(this.playerPositions[player.getName()]);
                     player.updatePosition();
-                    this.playAudio("/audio/move.mp3");
+                    this.playAudio("./audio/move.mp3");
                     await new Promise(resolve => setTimeout(resolve, 150));
                 }
 
@@ -236,9 +236,9 @@ class GameBoard {
                 player.updatePosition();
 
                 if (initialPos > this.playerPositions[player.getName()]) {
-                    this.playAudio("/audio/fall.mp3");
+                    this.playAudio("./audio/fall.mp3");
                 } else {
-                    this.playAudio("/audio/rise.mp3");
+                    this.playAudio("./audio/rise.mp3");
                 }
 
             }
@@ -253,7 +253,7 @@ class GameBoard {
                     if (this.playerPositions[player.getName()] === this.playerPositions[playerName]) {
                         this.playerPositions[playerName] = 0;
                         isCaptured = true;
-                        this.playAudio("/audio/fall.mp3");
+                        this.playAudio("./audio/fall.mp3");
                         await new Promise(resolve => setTimeout(resolve, 150));
                         this.players[playerName].setPosition(0);
                         this.players[playerName].updatePosition();
@@ -349,7 +349,7 @@ class GameBoard {
     playAudio = (src) => {
         var audio = new Audio(src);
 
-        if (src == "/audio/bg.mp3") {
+        if (src == "./audio/bg.mp3") {
             audio.volume = 0.1;
         } else {
             audio.volume = 1;
@@ -406,7 +406,7 @@ class GameBoard {
 
     playerRoll = () => {
         if (this.isPlaying === false) {
-            this.playAudio("/audio/bg.mp3");
+            this.playAudio("./audio/bg.mp3");
             this.isPlaying = true;
         }
         if (this.currentPlayerTurn === 0) this.playGame(this.players["red"]);
@@ -503,12 +503,10 @@ class GameBoard {
 
         /* Start game on enter key press */
         window.addEventListener("keypress", (e) => {
-            // if (e.code === "Enter" && superPlayButton.disabled === false && this.isGameOver === false) {
-            //     this.playerRoll();
-
-            // }
-
-            this.playerRoll();
+            if (e.code === "Enter" && superPlayButton.disabled === false && this.isGameOver === false) {
+                this.playerRoll();
+            }
+            // this.playerRoll();
         });
 
         const  windowResize = () => {
@@ -526,7 +524,7 @@ class GameBoard {
         }
 
         window.addEventListener("resize",windowResize);
-        window.addEventListener("load", windowResize)
+
 
         this.updateTurn();
     }
